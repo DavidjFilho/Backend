@@ -5,16 +5,36 @@ import bodyParser from "body-parser";
 import { routes } from "./routes";
 require("dotenv").config();
 
-const app: Application = express();
+class App {
+  public app: Application;
 
-app.use(express.json());
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(routes);
+  public constructor() {
+    this.start();
+    this.database();
+    this.middlewaresPreRoute();
+    this.routes();
+    this.middlewaresPosRoute();
+  }
 
-mongoose.connect(
-  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jcgpdjt.mongodb.net/${process.env.DB_DATABASE}`,
-  {}
-);
+  private start(): void {
+    this.app = express();
+  }
 
-export default app;
+  private middlewaresPreRoute(): void {
+    this.app.use(express.json());
+    this.app.use(cors());
+    this.app.use(bodyParser.urlencoded({ extended: false }));
+  }
+  private database(): void {
+    mongoose.connect(
+      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jcgpdjt.mongodb.net/${process.env.DB_DATABASE}`,
+      {}
+    );
+  }
+  private routes(): void {
+    this.app.use(routes);
+  }
+  private middlewaresPosRoute(): void {}
+}
+
+export default new App().app;
