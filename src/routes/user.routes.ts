@@ -7,10 +7,10 @@ router.post("/create", (req: Request, res: Response): Response => {
 });
 
 router.get("/", (req: Request, res: Response): Response => {
-    return res.json({ message: "Hello world!" });
+    return res.json({ message: "TA CHEGANDO LAAA" });
 });
 
-router.get("/:id", (req: Request, res: Response): Response => {
+router.get("/:id", (_req: Request, res: Response): Response => {
     return res.json({ message: "Hello world!" });
 });
 
