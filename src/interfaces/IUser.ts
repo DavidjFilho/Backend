@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import mongoose from "mongoose";
 
 interface IUser {
@@ -49,6 +50,14 @@ interface IUserRepository {
   createUser(userCreateData: IUserCreate): Promise<IUser>;
 }
 
+interface IUserController {
+  create(req: Request, res: Response): Promise<Response>;
+  getUser(req: Request, res: Response): Promise<Response>;
+  getUsers(req: Request, res: Response): Promise<Response>;
+  update(req: Request, res: Response): Promise<Response>;
+  delete(req: Request, res: Response): Promise<Response>;
+}
+
 export {
   IUser,
   IUserPartial,
@@ -56,4 +65,5 @@ export {
   IUserCreateReturn,
   IUserRepository,
   IUserFindByObject,
+  IUserController,
 };

@@ -1,25 +1,12 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
+import UserController from "../controllers/UserController";
 
 const router = Router();
 
-router.post("/create", (req: Request, res: Response): Response => {
-  return res.status(201).json({ message: "Hello world!" });
-});
-
-router.get("/", (req: Request, res: Response): Response => {
-    return res.json({ message: "TA CHEGANDO LAAA" });
-});
-
-router.get("/:id", (_req: Request, res: Response): Response => {
-    return res.json({ message: "Hello world!" });
-});
-
-router.patch("/:id", (req: Request, res: Response): Response => {
-    return res.json({ message: "Hello world!" });
-});
-
-router.post("/", (req: Request, res: Response): Response => {
-    return res.json({ message: "Hello world!" });
-});
+router.post("/create", UserController.create);
+router.get("/", UserController.getUsers);
+router.get("/:id", UserController.getUser);
+router.patch("/:id", UserController.update);
+router.post("/delete", UserController.delete);
 
 export { router as userRoutes };
