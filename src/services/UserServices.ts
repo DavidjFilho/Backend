@@ -22,39 +22,31 @@ class UserServices implements IUserServices {
                 .max(16, "A senha necessita de no máximo dezesseis caracteres!")
                 .trim(),
         });
-        try {
-            const userDataValidate = await userSchema.validate(userCreateData);
+        const userDataValidate = await userSchema.validate(userCreateData);
 
-            const { name, email, password } = userDataValidate;
+        const { name, email, password } = userDataValidate;
 
-            const userExists = await MongoUserRepository.findByObject({ email });
+        const userExists = await MongoUserRepository.findByObject({ email });
 
-            if (userExists) {
-                throw new Error("E-mail já cadastrado!");
-            }
-
-            const hashPassword = md5(password + process.env.SALT_KEY);
-            const id = v4();
-
-            const userData: IUser = {
-                id,
-                name,
-                email,
-                password: hashPassword,
-            };
-            const user = await MongoUserRepository.createUser(userData);
-
-            return {
-                statusCode: HttpStatusCode.Created,
-                message: user,
-            };
-        } catch (error) {
-            console.error(error);
-            return {
-                statusCode: HttpStatusCode.InternalServerError,
-                message: "Something went wrong. Internal Server Error",
-            };
+        if (userExists) {
+            throw new Error("E-mail já cadastrado!");
         }
+
+        const hashPassword = md5(password + process.env.SALT_KEY);
+        const id = v4();
+
+        const userData: IUser = {
+            id,
+            name,
+            email,
+            password: hashPassword,
+        };
+        const user = await MongoUserRepository.createUser(userData);
+
+        return {
+            statusCode: HttpStatusCode.Created,
+            message: user,
+        };
     }
 
     async getUser(id: string): Promise<IUserServicesReturn> {
