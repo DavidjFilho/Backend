@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { HttpStatusCode } from "../constants/HttpStatusCode";
 
 interface IUser {
   id: string;
   name: string;
   email: string;
   password: string;
-  phone: string;
+  phone?: string;
   anddresses?: [
     {
       street: string;
@@ -34,20 +35,20 @@ interface IUserCreate {
 
 interface IUserCreateReturn {}
 
-interface IUserFindByObject {
+type IUserFindByObject = {
   _id?: mongoose.Types.ObjectId;
   id?: string;
   name?: string;
   email?: string;
   phone?: string;
-}
+};
 
 interface IUserRepository {
   findByObject(userData: IUserFindByObject): Promise<IUser | null>;
 
   findAll(): Promise<IUser[]>;
 
-  createUser(userCreateData: IUserCreate): Promise<IUser>;
+  createUser(userData: IUser): Promise<IUser>;
 }
 
 interface IUserController {
@@ -58,6 +59,24 @@ interface IUserController {
   delete(req: Request, res: Response): Promise<Response>;
 }
 
+type IUserReturn = Promise<IUser | null>;
+
+type IUserServicesReturn = {
+  statusCode: HttpStatusCode;
+  message: any;
+};
+
+interface IUserServices {
+  create(userCreateData: IUserCreate): Promise<IUserServicesReturn>;
+  getUser(id: string): Promise<IUserServicesReturn>;
+  getUsers(): Promise<IUserServicesReturn>;
+  update(
+    userUpdateData: IUserPartial,
+    id: string
+  ): Promise<IUserServicesReturn>;
+  delete(id: string): Promise<IUserServicesReturn>;
+}
+
 export {
   IUser,
   IUserPartial,
@@ -66,4 +85,7 @@ export {
   IUserRepository,
   IUserFindByObject,
   IUserController,
+  IUserReturn,
+  IUserServices,
+  IUserServicesReturn,
 };

@@ -3,11 +3,12 @@ import {
   IUser,
   IUserCreate,
   IUserFindByObject,
+  IUserReturn,
 } from "../interfaces/IUser";
 import { User } from "../models/User";
 
 class MongoUserRepository implements IUserRepository {
-  async findByObject(userData: IUserFindByObject): Promise<IUser | null> {
+  async findByObject(userData: IUserFindByObject): IUserReturn {
     return await User.findOne(userData);
   }
 
@@ -15,8 +16,8 @@ class MongoUserRepository implements IUserRepository {
     return await User.find();
   }
 
-  async createUser(userCreateData: IUserCreate): Promise<IUser> {
-    return await new User(userCreateData).save();
+  async createUser(userData: IUser): Promise<IUser> {
+    return await new User(userData).save();
   }
 }
 
