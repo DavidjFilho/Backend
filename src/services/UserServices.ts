@@ -5,10 +5,12 @@ import * as yup from "yup";
 import md5 from "md5";
 import { v4 } from "uuid";
 import MongoUserRepository from "../repositories/MongoUserRepository";
+import Util from "../Utils/Util";
+import { BadRequestError } from "../helpers/API-Error";
 
 class UserServices implements IUserServices {
     async create(userCreateData: IUserCreate): Promise<IUserServicesReturn> {
-        const userSchema = yup.object({
+        const userSchema = {
             name: yup.string().required("O Campo nome é obrigatório!").min(3, "O nome necessita de no mínimo três caracteres!").trim(),
             email: yup
                 .string()
@@ -21,15 +23,15 @@ class UserServices implements IUserServices {
                 .min(8, "A senha necessita de no mínimo oito caracteres!")
                 .max(16, "A senha necessita de no máximo dezesseis caracteres!")
                 .trim(),
-        });
-        const userDataValidate = await userSchema.validate(userCreateData);
+        };
+        const userDataValidate = await Util.validationData(userSchema, userCreateData);
 
         const { name, email, password } = userDataValidate;
 
         const userExists = await MongoUserRepository.findByObject({ email });
 
         if (userExists) {
-            throw new Error("E-mail já cadastrado!");
+            throw new BadRequestError("E-mail já cadastrado!");
         }
 
         const hashPassword = md5(password + process.env.SALT_KEY);
