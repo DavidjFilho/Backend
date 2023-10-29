@@ -11,24 +11,24 @@ class UserController implements IUserController {
     }
     async getUser(req: Request, res: Response): Promise<Response> {
         const id: string = req.params.id;
-        const result = id;
-        return res.json(result);
+        const result = await UserServices.getUser(id);
+        return res.json({ message: result.message });
     }
     async getUsers(req: Request, res: Response): Promise<Response> {
-        const result = "alo";
-        return res.json(result);
+        const result = await UserServices.getUsers();
+        return res.json({ message: result.message });
     }
     async update(req: Request, res: Response): Promise<Response> {
         const { name, email, password } = req.body;
         const userUpdateData: IUserPartial = { name, email, password };
         const id: string = req.params.id;
-        const result = userUpdateData;
-        return res.json(result);
+        const result = await UserServices.update(userUpdateData, id);
+        return res.json({ message: result.message });
     }
     async delete(req: Request, res: Response): Promise<Response> {
         const id: string = req.params.id;
-        const result = id;
-        return res.json(result);
+        const result = await UserServices.delete(id);
+        return res.json({ message: result.message });
     }
 }
 

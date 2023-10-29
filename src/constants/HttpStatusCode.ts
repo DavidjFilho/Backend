@@ -13,6 +13,7 @@ enum HttpStatusCode {
   InternalServerError = 500,
   BadGateway = 502,
   GatewayTimeout = 504,
+
 }
 
 export { HttpStatusCode };

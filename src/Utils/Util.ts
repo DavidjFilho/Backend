@@ -13,6 +13,12 @@ class Utils {
             throw new BadRequestError(error.message);
         }
     }
+    public blankLines(data: string) {
+        return !data.includes(" ");
+    }
+    public validationNameDiferentEmail(name: string, email: string): boolean {
+        return name != email;
+    }
 }
 
 export default new Utils();

@@ -6,12 +6,20 @@ import md5 from "md5";
 import { v4 } from "uuid";
 import MongoUserRepository from "../repositories/MongoUserRepository";
 import Util from "../Utils/Util";
-import { BadRequestError } from "../helpers/API-Error";
+import { BadRequestError, NotFoundError } from "../helpers/API-Error";
+import { UserStatus } from "../constants/UserStatus";
 
 class UserServices implements IUserServices {
     async create(userCreateData: IUserCreate): Promise<IUserServicesReturn> {
         const userSchema = {
-            name: yup.string().required("O Campo nome é obrigatório!").min(3, "O nome necessita de no mínimo três caracteres!").trim(),
+            name: yup
+                .string()
+                .required("O Campo nome é obrigatório!")
+                .min(3, "O nome necessita de no mínimo três caracteres!")
+                .trim()
+                .test("Name-invalido", "O nome não pode ser igual ao email.", (name, context) => {
+                    return Util.validationNameDiferentEmail(name, context.parent.email);
+                }),
             email: yup
                 .string()
                 .required("O Campo e-mail é obrigatório!")
@@ -22,7 +30,27 @@ class UserServices implements IUserServices {
                 .required("O campo senha é obrigatório!")
                 .min(8, "A senha necessita de no mínimo oito caracteres!")
                 .max(16, "A senha necessita de no máximo dezesseis caracteres!")
-                .trim(),
+                .trim()
+                .test("Senha-espacos", "a senha não pode ter espaços em branco", (senha) => {
+                    return Util.blankLines(senha);
+                })
+                .test(
+                    "Senha-requerimentos",
+                    "A senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial",
+                    (senha) => {
+                        const uppercaseRegex = /[A-Z]/;
+                        const lowercaseRegex = /[a-z]/;
+                        const numberRegex = /[0-9]/;
+                        const specialCharRegex = /[!@#$%^&*]/;
+
+                        return (
+                            uppercaseRegex.test(senha) &&
+                            lowercaseRegex.test(senha) &&
+                            numberRegex.test(senha) &&
+                            specialCharRegex.test(senha)
+                        );
+                    }
+                ),
         };
         const userDataValidate = await Util.validationData(userSchema, userCreateData);
 
@@ -52,20 +80,39 @@ class UserServices implements IUserServices {
     }
 
     async getUser(id: string): Promise<IUserServicesReturn> {
+        if (!id) {
+            throw new BadRequestError("Id é um campo obrigatório!");
+        }
+        const user = await MongoUserRepository.findByObject({ id });
+
+        if (!user || user?.status === UserStatus.StatusDeletado) {
+            throw new NotFoundError("Usuário inexistente!");
+        }
+
         return {
             statusCode: HttpStatusCode.OK,
-            message: "",
+            message: user,
         };
     }
 
     async getUsers(): Promise<IUserServicesReturn> {
+        const users = await MongoUserRepository.findAll();
         return {
             statusCode: HttpStatusCode.OK,
-            message: "",
+            message: users,
         };
     }
 
     async update(userUpdateData: IUserPartial, id: string): Promise<IUserServicesReturn> {
+        if (!id) {
+            throw new BadRequestError("Id é um campo obrigatório!");
+        }
+        const user = await MongoUserRepository.findByObject({ id });
+
+        if (!user || user?.status === UserStatus.StatusDeletado) {
+            throw new NotFoundError("Usuário inexistente!");
+        }
+
         return {
             statusCode: HttpStatusCode.OK,
             message: "",
@@ -73,9 +120,23 @@ class UserServices implements IUserServices {
     }
 
     async delete(id: string): Promise<IUserServicesReturn> {
+        if (!id) {
+            throw new BadRequestError("Id é um campo obrigatório!");
+        }
+        const user = await MongoUserRepository.findByObject({ id });
+
+        if (!user || user?.status === UserStatus.StatusDeletado) {
+            throw new NotFoundError("Usuário inexistente!");
+        }
+        const userDelete = await MongoUserRepository.updateById(user._id as string, {
+            deletedAt: new Date(),
+            status: UserStatus.StatusDeletado,
+            email: user.email + "_canceled_" + new Date().getTime(),
+        });
+
         return {
             statusCode: HttpStatusCode.OK,
-            message: "",
+            message: userDelete,
         };
     }
 }
