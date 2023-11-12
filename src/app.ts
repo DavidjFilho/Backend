@@ -28,7 +28,16 @@ class App {
         this.app.use(bodyParser.urlencoded({ extended: false }));
     }
     private database(): void {
-        mongoose.connect(`mongodb://127.0.0.1:27017/${process.env.DB_DATABASE}`, {});
+        if (process.env.NODE_AMBIENT === "0") {
+            //TEST
+            mongoose.connect(`mongodb://127.0.0.1:27017/${process.env.DB_DATABASE_TEST}`, {});
+        } else if (process.env.NODE_AMBIENT === "1") {
+            //DEV
+            mongoose.connect(`mongodb://127.0.0.1:27017/${process.env.DB_DATABASE_DEV}`, {});
+        } else if (process.env.NODE_AMBIENT === "2"){
+            //PROD
+            mongoose.connect(`mongodb://127.0.0.1:27017/${process.env.DB_DATABASE_PROD}`, {});
+        } 
     }
     private routes(): void {
         this.app.use(routes);
