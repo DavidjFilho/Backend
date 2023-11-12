@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "build": "tsup src --loader .log=text --loader .html=text --loader .xml=text"
   },
   "keywords": [],
   "author": "",
